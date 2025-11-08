@@ -4,35 +4,38 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+
+	// register postgres driver
+	_ "github.com/lib/pq"
 )
 
 const (
   host     = "localhost"
   port     = 5432
-  user     = "postgres"
-  password = "your-password"
-  dbname   = "calhounio_demo"
+  user     = "adarshpadhi"
+  password = ""
+	dbname   = "employee_info"
 )
 
-func connectPostgresDB() {
-	// code to connect to Postgres database
-
+// ConnectPostgresDB opens and verifies a connection to Postgres.
+// It returns the *sql.DB for callers to use and close, or an error.
+func ConnectPostgresDB() (*sql.DB, error) {
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
-    "password=%s dbname=%s sslmode=disable",
-    host, port, user, password, dbname)
+		"password=%s dbname=%s sslmode=disable",
+		host, port, user, password, dbname)
 
 	db, err := sql.Open("postgres", psqlInfo)
-
 	if err != nil {
-	log.Fatal("Failed to connect to database:", err)
+		return nil, fmt.Errorf("sql.Open: %w", err)
 	}
 
-	defer db.Close()
+	// verify the connection is alive
+	if err := db.Ping(); err != nil {
+		// close opened handle on error to avoid leaks
+		_ = db.Close()
+		return nil, fmt.Errorf("db.Ping: %w", err)
+	}
 
-	err = db.Ping()
-	if err != nil {
-		panic(err)
-	} 
-
-
+	log.Println("Connected to Postgres Database successfully!")
+	return db, nil
 }

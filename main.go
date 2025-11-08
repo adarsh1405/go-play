@@ -7,6 +7,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/adarsh1405/go-play/connector"
+
 	"github.com/gorilla/mux"
 )
 
@@ -29,6 +31,18 @@ var data string
 func main() {
 	data = GetUserData()
 	decodedata(data)
+
+	db, err := connector.ConnectPostgresDB()
+	if err != nil {
+		log.Fatalf("failed to connect to postgres: %v", err)
+	}
+	defer func() {
+		if err := db.Close(); err != nil {
+			log.Printf("error closing db: %v", err)
+		}
+	}()
+
+
 
 	r := mux.NewRouter()
 	r.HandleFunc("/fetch", fetchDetails).Methods("GET")
