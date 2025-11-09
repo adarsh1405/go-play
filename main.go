@@ -26,11 +26,15 @@ type account struct {
 
 }
 var accounts []account
+var singleData account
 var data string
 
 func main() {
 	data = GetUserData()
 	decodedata(data)
+
+	connector.Hello()
+
 
 	db, err := connector.ConnectPostgresDB()
 	if err != nil {
@@ -42,11 +46,12 @@ func main() {
 		}
 	}()
 
-
-
 	r := mux.NewRouter()
 	r.HandleFunc("/fetch", fetchDetails).Methods("GET")
+	// r.HandleFunc("/insert", insertDetails).Methods("POST")
+	// r.HandleFunc("/delete", deleteDetails).Methods("DELETE")
 
+	
 	fmt.Println("Server is running on port 8080")
 	log.Fatal(http.ListenAndServe(":8080", r))
 

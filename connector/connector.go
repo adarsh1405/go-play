@@ -10,10 +10,10 @@ import (
 )
 
 const (
-  host     = "localhost"
-  port     = 5432
-  user     = "adarshpadhi"
-  password = ""
+  	host     = "localhost"
+  	port     = 5432
+  	user     = "adarshpadhi"
+  	password = ""
 	dbname   = "employee_info"
 )
 
@@ -37,5 +37,10 @@ func ConnectPostgresDB() (*sql.DB, error) {
 	}
 
 	log.Println("Connected to Postgres Database successfully!")
+	fmt.Println("Connected to Postgres Database successfully!")
 	return db, nil
+}
+
+func Hello() {
+	fmt.Println("Hello from connector package")
 }
