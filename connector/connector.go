@@ -3,7 +3,6 @@ package connector
 import (
 	"database/sql"
 	"fmt"
-	"log"
 
 	// register postgres driver
 	_ "github.com/lib/pq"
@@ -35,12 +34,5 @@ func ConnectPostgresDB() (*sql.DB, error) {
 		_ = db.Close()
 		return nil, fmt.Errorf("db.Ping: %w", err)
 	}
-
-	log.Println("Connected to Postgres Database successfully!")
-	fmt.Println("Connected to Postgres Database successfully!")
 	return db, nil
-}
-
-func Hello() {
-	fmt.Println("Hello from connector package")
 }
