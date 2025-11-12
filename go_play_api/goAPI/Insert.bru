@@ -1,0 +1,29 @@
+meta {
+  name: Insert
+  type: http
+  seq: 3
+}
+
+post {
+  url: http://localhost:8080/insert
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "id": 45,
+    "name": "Adarsh",
+    "username": "apa",
+    "email": "adarsh@dev.io",
+    "company": {
+      "name": "AMA",
+      "catchPhrase": "do it , get it"
+    }
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

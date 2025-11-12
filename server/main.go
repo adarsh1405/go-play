@@ -49,17 +49,22 @@ func Run() {
 	// Setting up the Router
 	r := mux.NewRouter()
 	r.HandleFunc("/fetch", fetchDetails).Methods("GET")
-	// r.HandleFunc("/insert", insertDetails).Methods("POST")
+	r.HandleFunc("/insert", insertDetails).Methods("POST")
+	r.HandleFunc("/entries", getAllEntries).Methods("GET")
 	// r.HandleFunc("/delete", deleteDetails).Methods("DELETE")
 
-	log.Println("Server is running on port 8080")
-	log.Fatal(http.ListenAndServe(":8080", r))
 
-	// Available endpoints
+		// Available endpoints
+	log.Println("------------------------------")
 	log.Println("Available endpoints:")
 	log.Println("GET     /fetch      - fetch all user details")
 	log.Println("POST    /insert     - insert user details")
+	log.Println("GET     /entries    - get all user details from database")
 	log.Println("DELETE  /delete     - delete user details")
+	log.Println("------------------------------")
+
+	log.Println("Server is running on port 8080")
+	log.Fatal(http.ListenAndServe(":8080", r))
 }
 
 
@@ -82,47 +87,31 @@ func fetchDetails(w http.ResponseWriter, r *http.Request) {
 	
 }
 
+func insertDetails(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 
-func deleteAllEntry() {
-	// Connect to Postgres DB
-	db, err := connector.ConnectPostgresDB()
-	if err != nil {
-		log.Fatalf("failed to connect to postgres: %v", err)
-	}
-	defer func() {
-		if err := db.Close(); err != nil {
-			log.Printf("error closing db: %v", err)
-		}
-	}()
+	// get the single user detail from request body
+	if err := json.NewDecoder(r.Body).Decode(&singleData); err != nil {
+		http.Error(w, "failed to decode request body", http.StatusBadRequest)
+		return
+	} 
+	
+	insertOneEntry(singleData)
 
-	sqlStatement := `DELETE FROM employee;`
-	_, err = db.Exec(sqlStatement)
-	if err != nil {
-		log.Fatalf("failed to delete data: %v", err)
+	if err := json.NewEncoder(w).Encode("User detail inserted into the database successfully"); err != nil {
+		http.Error(w, "failed to encode response", http.StatusInternalServerError)
 	}
-	log.Println("All records deleted from the employee table successfully")
+	log.Println("Status - " , http.StatusOK , " - Inserted user detail successfully")
 }
 
-func insertAllEntry() {
-	db, err := connector.ConnectPostgresDB()
-	if err != nil {
-		log.Fatalf("failed to connect to postgres: %v", err)
-	}
-	defer func() {
-		if err := db.Close(); err != nil {
-			log.Printf("error closing db: %v", err)
-		}
-	}()
+func getAllEntries( w http.ResponseWriter, r *http.Request) {
 
-	for _, account := range accounts {
-		sqlStatement := `
-		INSERT INTO employee (id, name, username, email, company_name, company_catchphrase)
-		VALUES ($1, $2, $3, $4, $5, $6)
-		ON CONFLICT (id) DO NOTHING;`
-		_, err = db.Exec(sqlStatement, account.ID, account.Name, account.Username, account.Email, account.Company.Name, account.Company.CatchPhrase)
-		if err != nil {
-			log.Fatalf("failed to insert data: %v", err)
-		}
+	w.Header().Set("Content-Type", "application/json")
+	getAll()
+
+	if err := json.NewEncoder(w).Encode(accounts); err != nil {
+		http.Error(w, "failed to encode response", http.StatusInternalServerError)
 	}
-	log.Println("All user details inserted into the database successfully")
-}
+	log.Println("Status - " , http.StatusOK , " - Fetched all user details from database successfully")
+}	
+
