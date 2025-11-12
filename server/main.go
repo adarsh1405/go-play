@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/adarsh1405/go-play/connector"
 	"github.com/gorilla/mux"
@@ -51,6 +52,7 @@ func Run() {
 	r.HandleFunc("/fetch", fetchDetails).Methods("GET")
 	r.HandleFunc("/insert", insertDetails).Methods("POST")
 	r.HandleFunc("/entries", getAllEntries).Methods("GET")
+	r.HandleFunc("/id/{id}", getByID).Methods("GET")
 	// r.HandleFunc("/delete", deleteDetails).Methods("DELETE")
 
 
@@ -60,6 +62,7 @@ func Run() {
 	log.Println("GET     /fetch      - fetch all user details")
 	log.Println("POST    /insert     - insert user details")
 	log.Println("GET     /entries    - get all user details from database")
+	log.Println("GET     /id/{id}   - get user detail by ID from database")
 	log.Println("DELETE  /delete     - delete user details")
 	log.Println("------------------------------")
 
@@ -115,3 +118,24 @@ func getAllEntries( w http.ResponseWriter, r *http.Request) {
 	log.Println("Status - " , http.StatusOK , " - Fetched all user details from database successfully")
 }	
 
+func getByID( w http.ResponseWriter, r *http.Request) {
+	
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	id := vars["id"]
+	intID, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, "invalid id", http.StatusBadRequest)
+		return
+	}
+	res,err := getOne(intID)
+	if err != nil {
+		http.Error(w, "failed to get user detail by ID", http.StatusInternalServerError)
+		log.Println("Error - " , err.Error())
+		return
+	}
+	if err := json.NewEncoder(w).Encode(res); err != nil {
+		http.Error(w, "failed to encode response", http.StatusInternalServerError)
+	}
+	log.Println("Status - " , http.StatusOK , " - Fetched user detail by ID from database successfully")
+}	
